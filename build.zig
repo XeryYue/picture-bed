@@ -10,6 +10,7 @@ pub fn build(b: *std.Build) !void {
     const build_steps = .{
         .zig_ini_test = b.step("zig-ini:test", "Run zig-ini unit test"),
         .bindings_wasm = b.step("bindings:wasm", "Build wasm bindings"),
+        .bindings_node = b.step("bindings:node", "Build node bindings"),
     };
 
     const optimize = b.standardOptimizeOption(.{});
@@ -20,6 +21,12 @@ pub fn build(b: *std.Build) !void {
             .cpu_arch = .wasm32,
             .os_tag = .freestanding,
         }),
+        .optimize = optimize,
+    });
+
+    build_node_bindings(b, build_steps.bindings_node, .{
+        .zig_ini_module = zig_ini_module,
+        .target = try resolve_target(b, .{}),
         .optimize = optimize,
     });
 
@@ -68,6 +75,31 @@ fn build_wasm_bindings(
     step_wasm_bindings.dependOn(&write_build_script.step);
 }
 
+fn build_node_bindings(
+    b: *std.Build,
+    step_node_bindings: *std.Build.Step,
+    options: struct {
+        zig_ini_module: *std.Build.Module,
+        target: std.Build.ResolvedTarget,
+        optimize: std.builtin.OptimizeMode,
+    },
+) void {
+    const node_bindings_generate = b.addSharedLibrary(.{
+        .name = "zig-ini",
+        .root_source_file = b.path("bindings/node/src/node_bindings.zig"),
+        .target = options.target,
+        .optimize = .ReleaseSmall,
+    });
+    node_bindings_generate.root_module.addImport("zig-ini", options.zig_ini_module);
+    node_bindings_generate.addSystemIncludePath(b.path("bindings/node/node_modules/node-api-headers/include"));
+    node_bindings_generate.linker_allow_shlib_undefined = true;
+    node_bindings_generate.linkLibC();
+    step_node_bindings.dependOn(&b.addInstallFile(
+        node_bindings_generate.getEmittedBin(),
+        b.pathJoin(&.{ "bindings/node", "zig-ini.node" }),
+    ).step);
+}
+
 fn build_zig_ini_test(
     b: *std.Build,
     step_zig_ini_test: *std.Build.Step,
@@ -79,7 +111,7 @@ fn build_zig_ini_test(
 ) void {
     const zig_init_test = b.addTest(.{
         .root_source_file = b.path("src/test.zig"),
-        .target = b.resolveTargetQuery(.{}),
+        .target = options.target,
         .optimize = options.optimize,
     });
     const run_ini_unit_test = b.addRunArtifact(zig_init_test);
