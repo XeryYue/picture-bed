@@ -33,6 +33,14 @@ importers:
         specifier: 1.4.0
         version: 1.4.0
 
+  examples/node:
+    devDependencies:
+      zig-ini:
+        specifier: workspace:*
+        version: link:../../npm/zig-ini
+
+  npm/zig-ini: {}
+
 packages:
 
   '@dprint/darwin-arm64@0.48.0':

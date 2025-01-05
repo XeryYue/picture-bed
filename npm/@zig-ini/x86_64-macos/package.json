@@ -1,0 +1,5 @@
+{
+  "name": "@zig-ini/x86_64-macos",
+  "os": ["darwin"],
+  "cpu": ["x64"]
+}

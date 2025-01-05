@@ -12,7 +12,7 @@ export interface FormatOptions {
   commentStyle: CommentStyle
 }
 
-export interface NativeBindings {
+interface NativeBindings {
   format: (input: string, options: CommentStyle) => string
 }
 
@@ -22,8 +22,8 @@ switch (platform) {
   case 'win32':
     break
   case 'darwin': {
-    if (fs.existsSync(path.join(__dirname, 'zig-ini.darwin.node'))) {
-      nativeBindings = require('./zig-ini.darwin.node') as NativeBindings
+    if (fs.existsSync(path.join(__dirname, 'zig-ini.node'))) {
+      nativeBindings = require('./zig-ini.node') as NativeBindings
       break
     }
     break

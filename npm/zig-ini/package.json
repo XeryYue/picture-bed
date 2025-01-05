@@ -1,0 +1,11 @@
+{
+  "name": "zig-ini",
+  "main": "./dist/inde.js",
+  "types": "./dist/index.d.ts",
+  "optionalDependencies": {
+    "@zig-ini/aarch64-macos": "workspace:*",
+    "@zig-ini/aarch64-windows": "workspace:*",
+    "@zig-ini/x86_64-macos": "worksapce:*",
+    "@zig-ini/x86_64-windows": "workspace:*"
+  }
+}

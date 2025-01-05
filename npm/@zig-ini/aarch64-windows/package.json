@@ -1,0 +1,5 @@
+{
+  "name": "@zig-ini/aarch64-windows",
+  "os": ["win32"],
+  "cpu": ["arm64"]
+}

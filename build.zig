@@ -1,5 +1,14 @@
 const std = @import("std");
 const builtin = @import("builtin");
+const assert = std.debug.assert;
+
+const platforms: []const std.Target.Query = &.{
+    .{ .cpu_arch = .aarch64, .os_tag = .macos },
+    .{ .cpu_arch = .x86_64, .os_tag = .macos },
+    // .{ .cpu_arch = .x86_64, .os_tag = .linux },
+    // .{ .cpu_arch = .x86_64, .os_tag = .windows },
+    // .{ .cpu_arch = .aarch64, .os_tag = .windows },
+};
 
 // zig build system guide
 // https://ziglang.org/learn/build-system/
@@ -26,8 +35,6 @@ pub fn build(b: *std.Build) !void {
 
     build_node_bindings(b, build_steps.bindings_node, .{
         .zig_ini_module = zig_ini_module,
-        .target = try resolve_target(b, .{}),
-        .optimize = optimize,
     });
 
     build_zig_ini_test(b, build_steps.zig_ini_test, .{
@@ -64,15 +71,22 @@ fn build_wasm_bindings(
     wasm_bindings_generate.rdynamic = true;
     wasm_bindings_generate.entry = .disabled;
 
-    step_wasm_bindings.dependOn(&b.addInstallArtifact(wasm_bindings_generate, .{
-        .dest_dir = .{
-            .override = .{ .custom = b.dupePath("bindings/wasm") },
-        },
-    }).step);
+    step_wasm_bindings.dependOn(&b.addInstallFile(wasm_bindings_generate.getEmittedBin(), b.pathJoin(&.{
+        "../bindings/wasm",
+        "zig-ini.wasm",
+    })).step);
 
     var write_build_script = b.addSystemCommand(&.{ "node", "./bindings/wasm/esbuild.js" });
 
     step_wasm_bindings.dependOn(&write_build_script.step);
+
+    const copy_dist = b.addSystemCommand(&.{
+        "cp",
+        "-r",
+        "./bindings/wasm/dist",
+        "./npm/zig-ini-wasm",
+    });
+    step_wasm_bindings.dependOn(&copy_dist.step);
 }
 
 fn build_node_bindings(
@@ -80,24 +94,30 @@ fn build_node_bindings(
     step_node_bindings: *std.Build.Step,
     options: struct {
         zig_ini_module: *std.Build.Module,
-        target: std.Build.ResolvedTarget,
-        optimize: std.builtin.OptimizeMode,
     },
 ) void {
-    const node_bindings_generate = b.addSharedLibrary(.{
-        .name = "zig-ini",
-        .root_source_file = b.path("bindings/node/src/node_bindings.zig"),
-        .target = options.target,
-        .optimize = .ReleaseSmall,
-    });
-    node_bindings_generate.root_module.addImport("zig-ini", options.zig_ini_module);
-    node_bindings_generate.addSystemIncludePath(b.path("bindings/node/node_modules/node-api-headers/include"));
-    node_bindings_generate.linker_allow_shlib_undefined = true;
-    node_bindings_generate.linkLibC();
-    step_node_bindings.dependOn(&b.addInstallFile(
-        node_bindings_generate.getEmittedBin(),
-        b.pathJoin(&.{ "bindings/node", "zig-ini.node" }),
-    ).step);
+    inline for (platforms) |platform| {
+        const node_bindings_generate = b.addSharedLibrary(.{
+            .name = "zig-ini",
+            .root_source_file = b.path("bindings/node/src/node_bindings.zig"),
+            .optimize = .ReleaseSmall,
+            .target = b.resolveTargetQuery(platform),
+        });
+        node_bindings_generate.root_module.addImport("zig-ini", options.zig_ini_module);
+        node_bindings_generate.addSystemIncludePath(b.path("bindings/node/node_modules/node-api-headers/include"));
+        node_bindings_generate.linker_allow_shlib_undefined = true;
+        node_bindings_generate.linkLibC();
+        step_node_bindings.dependOn(&b.addInstallFile(node_bindings_generate.getEmittedBin(), b.pathJoin(&.{
+            "../npm/@zig-ini",
+            arch_os_to_str(platform),
+            "zig-ini.node",
+        })).step);
+    }
+    // do build and copy file
+    const node_build_script = b.addSystemCommand(&.{ "node", "./bindings/node/esbuild.js" });
+    step_node_bindings.dependOn(&node_build_script.step);
+    const copy_dist = b.addSystemCommand(&.{ "cp", "-r", "./bindings/node/dist", "./npm/zig-ini" });
+    step_node_bindings.dependOn(&copy_dist.step);
 }
 
 fn build_zig_ini_test(
@@ -145,4 +165,10 @@ fn resolve_target(b: *std.Build, target_requested: std.Target.Query) !std.Build.
         }
     }
     return error.UnsupportedTarget;
+}
+
+inline fn arch_os_to_str(query: std.Target.Query) []const u8 {
+    const arch = query.cpu_arch orelse return "unknown";
+    const os = query.os_tag orelse return "unknown";
+    return @tagName(arch) ++ "-" ++ @tagName(os);
 }

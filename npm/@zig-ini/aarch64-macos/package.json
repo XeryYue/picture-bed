@@ -1,0 +1,5 @@
+{
+  "name": "@zig-ini/aarch64-macos",
+  "os": ["darwin"],
+  "cpu": ["arm64"]
+}

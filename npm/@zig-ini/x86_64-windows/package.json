@@ -1,0 +1,5 @@
+{
+  "name": "@zig-ini/x86_64-windows",
+  "os": ["win32"],
+  "cpu": ["x64"]
+}

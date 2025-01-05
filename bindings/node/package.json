@@ -1,5 +1,4 @@
 {
-  "name": "@zig-ini/node",
   "devDependencies": {
     "@types/node": "^22.10.3",
     "node-api-headers": "1.4.0"
