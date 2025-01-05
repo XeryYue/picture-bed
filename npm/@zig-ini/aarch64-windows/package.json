@@ -1,5 +1,7 @@
 {
   "name": "@zig-ini/aarch64-windows",
   "os": ["win32"],
-  "cpu": ["arm64"]
+  "cpu": ["arm64"],
+  "main": "zig-ini.node",
+  "files": ["zig-ini.node"]
 }

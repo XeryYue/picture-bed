@@ -1,5 +1,7 @@
 {
   "devDependencies": {
-    "zig-ini": "workspace:*"
+    "zig-ini": "workspace:*",
+    "@zig-ini/wasm": "workspace:*",
+    "@zig-ini/aarch64-macos": "workspace:*"
   }
 }

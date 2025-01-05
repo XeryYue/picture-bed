@@ -1,6 +1,4 @@
-// base64
-declare const zigIni: string
-
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
 let wasm: typeof import('./zig-ini.wasm')
 
 const TextEncode = new TextEncoder()
@@ -26,7 +24,7 @@ export function format(input: string, options?: FormatOptions): string {
   if (!wasm) {
     loadWASM()
   }
-  options = { ...defaultOptions, ...options }
+  options = { ...defaultOptions, ...options ?? {} }
 
   const parsedOptions = Object.entries(options).reduce((acc, [key, value]: [string, string]) => {
     return { ...acc, [toSnakeCase(key)]: value }

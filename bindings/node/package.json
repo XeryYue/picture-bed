@@ -1,6 +1,7 @@
 {
+  "name": "bindings-node",
   "devDependencies": {
-    "@types/node": "^22.10.3",
     "node-api-headers": "1.4.0"
-  }
+  },
+  "exports": "./src/index.ts"
 }

@@ -1,0 +1,4 @@
+{
+  "name": "bindings-wasm",
+  "exports": "./src/index.ts"
+}

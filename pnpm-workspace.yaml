@@ -1,4 +1,4 @@
 packages:
   - "bindings/*"
-  - "npm/*"
+  - "npm/**"
   - "examples/*"

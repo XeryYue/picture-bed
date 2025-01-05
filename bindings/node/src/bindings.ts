@@ -1,6 +1,5 @@
+/* eslint-disable no-useless-catch */
 /* eslint-disable @typescript-eslint/no-require-imports */
-import fs from 'fs'
-import path from 'path'
 
 const { arch, platform } = process
 
@@ -13,23 +12,58 @@ export interface FormatOptions {
 }
 
 interface NativeBindings {
-  format: (input: string, options: CommentStyle) => string
+  format: (input: string, options: Record<string, string>) => string
 }
 
 let nativeBindings: NativeBindings | null = null
 
 switch (platform) {
-  case 'win32':
-    break
-  case 'darwin': {
-    if (fs.existsSync(path.join(__dirname, 'zig-ini.node'))) {
-      nativeBindings = require('./zig-ini.node') as NativeBindings
-      break
+  case 'win32': {
+    switch (arch) {
+      case 'x64': {
+        try {
+          nativeBindings = require('@zig-ini/x86_64-windows') as NativeBindings
+        } catch (e) {
+          throw e
+        }
+        break
+      }
+      case 'arm64': {
+        try {
+          nativeBindings = require('@zig-ini/aarch64-windows') as NativeBindings
+        } catch (e) {
+          throw e
+        }
+        break
+      }
+      default:
+        throw new Error(`Unsupported architecture on macOS: ${arch}`)
     }
     break
   }
-  case 'linux':
+  case 'darwin': {
+    switch (arch) {
+      case 'x64': {
+        try {
+          nativeBindings = require('@zig-ini/x86_64-macos') as NativeBindings
+        } catch (e) {
+          throw e
+        }
+        break
+      }
+      case 'arm64': {
+        try {
+          nativeBindings = require('@zig-ini/aarch64-macos') as NativeBindings
+        } catch (e) {
+          throw e
+        }
+        break
+      }
+      default:
+        throw new Error(`Unsupported architecture on macOS: ${arch}`)
+    }
     break
+  }
   default:
     throw new Error(`Unsupported OS: ${platform}, arch: ${arch}`)
 }
@@ -38,6 +72,21 @@ if (!nativeBindings) {
   throw new Error('Failed to load native bindingss')
 }
 
-const { format } = nativeBindings
+const { format: _format } = nativeBindings
 
-export { format }
+const defaultOptions = {
+  quoteStyle: 'dobule',
+  commentStyle: 'hash'
+} satisfies FormatOptions
+
+function toSnakeCase(str: string): string {
+  return str.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`)
+}
+
+export function format(input: string, options?: FormatOptions) {
+  options = { ...defaultOptions, ...options ?? {} }
+  const parsedOptions = Object.entries(options).reduce((acc, [key, value]: [string, string]) => {
+    return { ...acc, [toSnakeCase(key)]: value }
+  }, {} as Record<string, string>)
+  return _format(input, parsedOptions)
+}

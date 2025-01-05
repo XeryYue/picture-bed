@@ -1,5 +1,7 @@
 {
   "name": "@zig-ini/x86_64-windows",
   "os": ["win32"],
-  "cpu": ["x64"]
+  "cpu": ["x64"],
+  "main": "zig-ini.node",
+  "files": ["zig-ini.node"]
 }

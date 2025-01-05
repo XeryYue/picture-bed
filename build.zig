@@ -76,7 +76,14 @@ fn build_wasm_bindings(
         "zig-ini.wasm",
     })).step);
 
-    var write_build_script = b.addSystemCommand(&.{ "node", "./bindings/wasm/esbuild.js" });
+    var write_build_script = b.addSystemCommand(&.{
+        "./node_modules/.bin/jiek",
+        "build",
+        "-f",
+        "bindings-wasm",
+        "-c",
+        "bindings/wasm/.jiek.config.js",
+    });
 
     step_wasm_bindings.dependOn(&write_build_script.step);
 
@@ -114,10 +121,18 @@ fn build_node_bindings(
         })).step);
     }
     // do build and copy file
-    const node_build_script = b.addSystemCommand(&.{ "node", "./bindings/node/esbuild.js" });
+    const node_build_script = b.addSystemCommand(&.{
+        "./node_modules/.bin/jiek",
+        "build",
+        "-f",
+        "bindings-node",
+        "--noMin",
+    });
     step_node_bindings.dependOn(&node_build_script.step);
     const copy_dist = b.addSystemCommand(&.{ "cp", "-r", "./bindings/node/dist", "./npm/zig-ini" });
+    const copy_post_install = b.addSystemCommand(&.{ "cp", "-r", "./bindings/node/install.js", "./npm/zig-ini" });
     step_node_bindings.dependOn(&copy_dist.step);
+    step_node_bindings.dependOn(&copy_post_install.step);
 }
 
 fn build_zig_ini_test(

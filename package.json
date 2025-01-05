@@ -7,11 +7,14 @@
   "author": "",
   "license": "MIT",
   "devDependencies": {
+    "@types/node": "^22.10.3",
     "dprint": "^0.48.0",
-    "esbuild": "^0.24.2",
-    "typescript": "^5.7.2",
     "eslint": "^9.16.0",
-    "eslint-config-kagura": "^3.0.1"
+    "eslint-config-kagura": "^3.0.1",
+    "jiek": "^2.3.3",
+    "rollup-plugin-esbuild": "^6.1.1",
+    "typescript": "^5.7.2",
+    "@pnpm/filter-workspace-packages": "latest"
   },
   "packageManager": "pnpm@9.14.4+sha512.c8180b3fbe4e4bca02c94234717896b5529740a6cbadf19fa78254270403ea2f27d4e1d46a08a0f56c89b63dc8ebfd3ee53326da720273794e6200fcf0d184ab"
 }
