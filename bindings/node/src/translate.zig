@@ -2,6 +2,8 @@ const std = @import("std");
 const c = @import("c.zig");
 const assert = std.debug.assert;
 
+const c_alloc = std.heap.c_allocator;
+
 // https://nodejs.org/api/n-api.html#node-api
 
 const TranslationError = error{
@@ -108,6 +110,22 @@ pub fn slice_from_value(env: c.napi_env, value: c.napi_value) ![]u8 {
     assert(c.napi_get_buffer_info(env, value, &data, &data_length) == c.napi_ok);
 
     return @as([*]u8, @ptrCast(data.?))[0..data_length];
+}
+
+pub fn js_str_from_value(env: c.napi_env, value: c.napi_value) ![]u8 {
+    var str_length: usize = undefined;
+    assert(c.napi_get_value_string_utf8(env, value, null, 0, &str_length) == c.napi_ok);
+    var str = try c_alloc.alloc(u8, str_length + 1);
+    assert(c.napi_get_value_string_utf8(env, value, @as([*c]u8, @ptrCast(str)), str.len, &str_length) == c.napi_ok);
+    return str[0..str_length];
+}
+
+pub fn js_str_from_object(env: c.napi_env, object: c.napi_value, comptime key: [:0]const u8) ![]u8 {
+    var property: c.napi_value = undefined;
+    if (c.napi_get_named_property(env, object, key, &property) != c.napi_ok) {
+        return throw(env, key ++ " must be defined");
+    }
+    return js_str_from_value(env, property);
 }
 
 pub fn slice_from_object(

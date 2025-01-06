@@ -1,0 +1,7 @@
+{
+  "name": "@zig-ini/x86_64-linux",
+  "main": "zig-ini.node",
+  "os": ["linux"],
+  "cpu": ["x64"],
+  "files": ["zig-ini.node"]
+}

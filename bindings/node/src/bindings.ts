@@ -1,7 +1,11 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable no-useless-catch */
 /* eslint-disable @typescript-eslint/no-require-imports */
 
 const { arch, platform } = process
+import fs from 'fs'
 
 export type QuoteStyle = 'none' | 'single' | 'dobule'
 
@@ -16,6 +20,21 @@ interface NativeBindings {
 }
 
 let nativeBindings: NativeBindings | null = null
+
+function isMusl() {
+  if (!process.report || typeof process.report.getReport !== 'function') {
+    try {
+      const lddPath = require('child_process').execSync('which ldd').toString().trim() as string
+      return fs.readFileSync(lddPath, 'utf8').includes('musl')
+    } catch {
+      return true
+    }
+  } else {
+    // @ts-expect-error safe
+    const { glibcVersionRuntime } = process.report.getReport().header
+    return !glibcVersionRuntime
+  }
+}
 
 switch (platform) {
   case 'win32': {
@@ -61,6 +80,23 @@ switch (platform) {
       }
       default:
         throw new Error(`Unsupported architecture on macOS: ${arch}`)
+    }
+    break
+  }
+  case 'linux': {
+    switch (arch) {
+      case 'x64': {
+        if (isMusl()) {
+          break
+        } else {
+          try {
+            nativeBindings = require('@zig-ini/x86_64-linux') as NativeBindings
+          } catch (e) {
+            throw e
+          }
+          break
+        }
+      }
     }
     break
   }

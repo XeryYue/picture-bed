@@ -49,6 +49,9 @@ importers:
       '@zig-ini/wasm':
         specifier: workspace:*
         version: link:../../npm/zig-ini-wasm
+      '@zig-ini/x86_64-linux':
+        specifier: workspace:*
+        version: link:../../npm/@zig-ini/x86_64-linux
       zig-ini:
         specifier: workspace:*
         version: link:../../npm/zig-ini
@@ -56,6 +59,8 @@ importers:
   npm/@zig-ini/aarch64-macos: {}
 
   npm/@zig-ini/aarch64-windows: {}
+
+  npm/@zig-ini/x86_64-linux: {}
 
   npm/@zig-ini/x86_64-linux-musl: {}
 
@@ -71,6 +76,9 @@ importers:
       '@zig-ini/aarch64-windows':
         specifier: workspace:*
         version: link:../@zig-ini/aarch64-windows
+      '@zig-ini/x86_64-linux':
+        specifier: workspace:*
+        version: link:../@zig-ini/x86_64-linux
       '@zig-ini/x86_64-macos':
         specifier: workspace:*
         version: link:../@zig-ini/x86_64-macos

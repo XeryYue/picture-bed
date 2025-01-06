@@ -19,13 +19,19 @@ export fn napi_register_module_v1(env: c.napi_env, exports: c.napi_value) c.napi
 
 fn format(env: c.napi_env, info: c.napi_callback_info) callconv(.C) c.napi_value {
     const args = transalte.extract_args(env, info, .{
-        .count = 1,
+        .count = 2,
         .function = "format",
     }) catch return null;
 
-    const input_str = transalte.slice_from_value(env, args[0]) catch return null;
+    const input_str = transalte.js_str_from_value(env, args[0]) catch return null;
+
+    const fmt_options = ini.FmtOptions{
+        .quote_style = ini.FmtOptions.QuoteStyle.from_str(transalte.js_str_from_object(env, args[1], "quote_style") catch "hash"),
+        .comment_style = ini.FmtOptions.CommentStyle.from_str(transalte.js_str_from_object(env, args[1], "comment_style") catch "double"),
+    };
+
     var parser = ini.Parse.init(c_alloc);
-    var printer = ini.Printer.init(c_alloc, .{});
+    var printer = ini.Printer.init(c_alloc, fmt_options);
     defer {
         parser.deinit();
         printer.deinit();

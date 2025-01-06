@@ -6,6 +6,7 @@
     "@zig-ini/aarch64-macos": "workspace:*",
     "@zig-ini/aarch64-windows": "workspace:*",
     "@zig-ini/x86_64-macos": "workspace:*",
-    "@zig-ini/x86_64-windows": "workspace:*"
+    "@zig-ini/x86_64-windows": "workspace:*",
+    "@zig-ini/x86_64-linux": "workspace:*"
   }
 }
