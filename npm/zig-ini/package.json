@@ -3,7 +3,7 @@
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "scripts": {
-    "install": "node ./dist/install.js"
+    "install": "node install.js"
   },
   "optionalDependencies": {
     "@zig-ini/aarch64-macos": "workspace:*",

@@ -16,6 +16,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22.9
+      - run: corepack enable
       - run: pnpm install
       - uses: mlugg/setup-zig@v1
       - run: zig build bindings:node
@@ -26,6 +27,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22.9
+      - run: corepack enable
       - run: pnpm install
       - uses: mlugg/setup-zig@v1
       - run: zig build bindings:wasm
