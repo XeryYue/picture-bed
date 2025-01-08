@@ -20,11 +20,21 @@ pub fn build(b: *std.Build) !void {
         .zig_ini_test = b.step("zig-ini:test", "Run zig-ini unit test"),
         .bindings_wasm = b.step("bindings:wasm", "Build wasm bindings"),
         .bindings_node = b.step("bindings:node", "Build node bindings"),
+        .dprint_plugin = b.step("dprint", "Build dprint plugin"),
     };
 
     const optimize = b.standardOptimizeOption(.{});
     const zig_ini_module = build_zig_ini_module(b);
     build_wasm_bindings(b, build_steps.bindings_wasm, .{
+        .zig_ini_module = zig_ini_module,
+        .target = try resolve_target(b, .{
+            .cpu_arch = .wasm32,
+            .os_tag = .freestanding,
+        }),
+        .optimize = optimize,
+    });
+
+    build_dprint(b, build_steps.dprint_plugin, .{
         .zig_ini_module = zig_ini_module,
         .target = try resolve_target(b, .{
             .cpu_arch = .wasm32,
@@ -96,6 +106,29 @@ fn build_wasm_bindings(
     step_wasm_bindings.dependOn(&copy_dist.step);
 }
 
+fn build_dprint(
+    b: *std.Build,
+    step_dprint: *std.Build.Step,
+    options: struct {
+        zig_ini_module: *std.Build.Module,
+        target: std.Build.ResolvedTarget,
+        optimize: std.builtin.OptimizeMode,
+    },
+) void {
+    const wasm_bindings_generate = b.addExecutable(.{
+        .name = "zig-ini",
+        .root_source_file = b.path("bindings/wasm/src/wasm_bindings.zig"),
+        .target = options.target,
+        .optimize = .ReleaseSmall,
+    });
+    wasm_bindings_generate.root_module.addImport("zig-ini", options.zig_ini_module);
+    wasm_bindings_generate.rdynamic = true;
+    wasm_bindings_generate.entry = .disabled;
+    step_dprint.dependOn(&b.addInstallFile(wasm_bindings_generate.getEmittedBin(), b.pathJoin(&.{
+        "../dprint",
+        "zig-ini.wasm",
+    })).step);
+}
 fn build_node_bindings(
     b: *std.Build,
     step_node_bindings: *std.Build.Step,
