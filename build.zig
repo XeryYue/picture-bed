@@ -130,6 +130,7 @@ fn build_node_bindings(
     });
     step_node_bindings.dependOn(&node_build_script.step);
     const copy_dist = b.addSystemCommand(&.{ "cp", "-r", "./bindings/node/dist", "./npm/zig-ini" });
+    copy_dist.step.dependOn(&node_build_script.step);
     // const copy_post_install = b.addSystemCommand(&.{ "cp", "-r", "./bindings/node/install.js", "./npm/zig-ini" });
     step_node_bindings.dependOn(&copy_dist.step);
     // step_node_bindings.dependOn(&copy_post_install.step);
