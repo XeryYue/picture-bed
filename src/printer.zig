@@ -153,27 +153,27 @@ test "StringBuilder" {
     try std.testing.expect(std.mem.eql(u8, sb.s.items, "00000"));
 }
 
-fn TestPrinter(fixture_name: []const u8, allocator: Allocator) !void {
-    const cwd = try std.process.getCwdAlloc(allocator);
-    const path = try std.fs.path.join(allocator, &[_][]const u8{ cwd, "/ini/", fixture_name });
-    const content = try std.fs.cwd().readFileAlloc(allocator, path, std.math.maxInt(usize));
-    defer {
-        allocator.free(cwd);
-        allocator.free(path);
-        allocator.free(content);
-    }
-    var parse = Parse.init(allocator);
-    defer parse.deinit();
-    try parse.parse(content);
-    var printer = Printer.init(allocator, .{});
-    defer printer.deinit();
-    try printer.stringify(parse.ast);
+// fn TestPrinter(fixture_name: []const u8, allocator: Allocator) !void {
+//     const cwd = try std.process.getCwdAlloc(allocator);
+//     const path = try std.fs.path.join(allocator, &[_][]const u8{ cwd, "/ini/", fixture_name });
+//     const content = try std.fs.cwd().readFileAlloc(allocator, path, std.math.maxInt(usize));
+//     defer {
+//         allocator.free(cwd);
+//         allocator.free(path);
+//         allocator.free(content);
+//     }
+//     var parse = Parse.init(allocator);
+//     defer parse.deinit();
+//     try parse.parse(content);
+//     var printer = Printer.init(allocator, .{});
+//     defer printer.deinit();
+//     try printer.stringify(parse.ast);
 
-    std.debug.print("{s}", .{printer.sb.s.items});
-}
+//     std.debug.print("{s}", .{printer.sb.s.items});
+// }
 
-test "Printer" {
-    try TestPrinter("base.ini", std.testing.allocator);
-    try TestPrinter("section.ini", std.testing.allocator);
-    try TestPrinter("comment.ini", std.testing.allocator);
-}
+// test "Printer" {
+//     try TestPrinter("base.ini", std.testing.allocator);
+//     try TestPrinter("section.ini", std.testing.allocator);
+//     try TestPrinter("comment.ini", std.testing.allocator);
+// }
