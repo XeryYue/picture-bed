@@ -3,5 +3,8 @@
   "devDependencies": {
     "node-api-headers": "1.4.0"
   },
-  "exports": "./src/index.ts"
+  "exports": {
+    "index": "./src/index.ts",
+    "install": "./src/install.ts"
+  }
 }

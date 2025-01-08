@@ -8,11 +8,13 @@ const ArrayList = std.ArrayList;
 const AST = ast.AST;
 const Loc = ast.Loc;
 const Node = ast.Node;
+const assert = std.debug.assert;
 
 pub const ParseError = error{
     InvalidPairs, // like missing init
     InvalidSection,
     UnexpectedToken,
+    InvalidSectionName,
 } || Allocator.Error;
 
 pub const Parse = struct {
@@ -147,7 +149,7 @@ pub const Parse = struct {
         }
 
         node.* = .{};
-        node.name = self.consume_identifer();
+        node.name = try self.consume_sec_identifer();
         if (self.current().kind == .whitespace) {
             self.advance();
         }
@@ -205,6 +207,41 @@ pub const Parse = struct {
                     if (start_token.kind == .string and (start_token.flag == .single_quote or start_token.flag == .double_quote)) {
                         break;
                     }
+                    self.advance();
+                },
+            }
+        }
+        const end_token = self.current();
+        const node = Node.Identifer{
+            .base = .{
+                .kind = .identifer,
+                .loc = Loc.create(start_token.line_number, start_token.start, end_token.end),
+            },
+            .value = self.source[start_token.start..end_token.end],
+        };
+        self.advance();
+        return node;
+    }
+
+    inline fn consume_sec_identifer(self: *Self) !Node.Identifer {
+        const start_token = self.current();
+        if (start_token.kind != .string) {
+            return error.InvalidSectionName;
+        }
+        while (true) {
+            switch (self.peek().kind) {
+                .end_of_file => break,
+                .break_line => break,
+                .open_bracket => break,
+                .close_bracket => break,
+                .whitespace => {
+                    self.advance();
+                    if (self.peek().kind == .equal or self.peek().kind == .close_bracket) {
+                        self.pos -= 1;
+                        break;
+                    }
+                },
+                else => {
                     self.advance();
                 },
             }

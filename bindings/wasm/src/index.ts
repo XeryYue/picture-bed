@@ -3,7 +3,7 @@ let wasm: typeof import('./zig-ini.wasm')
 
 const TextEncode = new TextEncoder()
 
-export type QuoteStyle = 'none' | 'single' | 'dobule'
+export type QuoteStyle = 'none' | 'single' | 'double'
 
 export type CommentStyle = 'hash' | 'semi'
 export interface FormatOptions {
@@ -12,7 +12,7 @@ export interface FormatOptions {
 }
 
 const defaultOptions = {
-  quoteStyle: 'dobule',
+  quoteStyle: 'double',
   commentStyle: 'hash'
 } satisfies FormatOptions
 

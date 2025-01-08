@@ -44,7 +44,8 @@ inline fn skip_not_valid_sequence(c: i32) bool {
         -1 => return true,
         '[' => return true,
         ']' => return true,
-        ':', '=' => return true,
+        // ':',
+        '=' => return true,
         ' ', '\t' => return true,
         else => return false,
     }
@@ -207,7 +208,8 @@ pub const Lex = struct {
                         }
                     }
                 },
-                ':', '=' => {
+                // ':',
+                '=' => {
                     self.token.kind = .equal;
                     self.token.flag = if (self.code_point == '=') Token.Flag.normal_equal else Token.Flag.colon_equal;
                     self.step();

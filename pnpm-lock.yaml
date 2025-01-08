@@ -43,15 +43,9 @@ importers:
 
   examples/node:
     devDependencies:
-      '@zig-ini/aarch64-macos':
-        specifier: workspace:*
-        version: link:../../npm/@zig-ini/aarch64-macos
       '@zig-ini/wasm':
         specifier: workspace:*
         version: link:../../npm/zig-ini-wasm
-      '@zig-ini/x86_64-linux':
-        specifier: workspace:*
-        version: link:../../npm/@zig-ini/x86_64-linux
       zig-ini:
         specifier: workspace:*
         version: link:../../npm/zig-ini

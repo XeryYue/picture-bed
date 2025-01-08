@@ -7,14 +7,6 @@
 const { arch, platform } = process
 import fs from 'fs'
 
-export type QuoteStyle = 'none' | 'single' | 'dobule'
-
-export type CommentStyle = 'hash' | 'semi'
-export interface FormatOptions {
-  quoteStyle: QuoteStyle
-  commentStyle: CommentStyle
-}
-
 interface NativeBindings {
   format: (input: string, options: Record<string, string>) => string
 }
@@ -108,21 +100,4 @@ if (!nativeBindings) {
   throw new Error('Failed to load native bindingss')
 }
 
-const { format: _format } = nativeBindings
-
-const defaultOptions = {
-  quoteStyle: 'dobule',
-  commentStyle: 'hash'
-} satisfies FormatOptions
-
-function toSnakeCase(str: string): string {
-  return str.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`)
-}
-
-export function format(input: string, options?: FormatOptions) {
-  options = { ...defaultOptions, ...options ?? {} }
-  const parsedOptions = Object.entries(options).reduce((acc, [key, value]: [string, string]) => {
-    return { ...acc, [toSnakeCase(key)]: value }
-  }, {} as Record<string, string>)
-  return _format(input, parsedOptions)
-}
+export const { format } = nativeBindings

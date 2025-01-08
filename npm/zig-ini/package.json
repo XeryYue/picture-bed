@@ -2,6 +2,9 @@
   "name": "zig-ini",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "scripts": {
+    "install": "node ./dist/install.js"
+  },
   "optionalDependencies": {
     "@zig-ini/aarch64-macos": "workspace:*",
     "@zig-ini/aarch64-windows": "workspace:*",
